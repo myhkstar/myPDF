@@ -87,6 +87,7 @@ configure_nginx() {
     local backend_url=$1
     echo "Configuring nginx with backend URL: $backend_url"
     sed -i "s|\${BACKEND_URL}|${backend_url}|g" /etc/nginx/nginx.conf
+    sed -i "s|\${PORT}|${PORT:-8080}|g" /etc/nginx/nginx.conf
 }
 
 # Function to run as user or root depending on permissions
@@ -302,7 +303,7 @@ setup_permissions
 # Handle different modes
 case "$MODE" in
     BOTH)
-        echo "Starting in BOTH mode: Frontend + Backend on port 8080"
+        echo "Starting in BOTH mode: Frontend + Backend on port ${PORT:-8080}"
 
         # Configure nginx to proxy to internal backend
         configure_nginx "http://localhost:${BACKEND_INTERNAL_PORT:-8081}"
@@ -321,51 +322,51 @@ case "$MODE" in
         # Wait for backend to start
         sleep 3
 
-        # Start nginx on port 8080
-        echo "Starting nginx on port 8080..."
+        # Start nginx on port ${PORT:-8080}
+        echo "Starting nginx on port ${PORT:-8080}..."
         run_as_user nginx -g "daemon off;" &
         NGINX_PID=$!
 
         echo "==================================="
-        echo "✓ Frontend available at: http://localhost:8080"
-        echo "✓ Backend API at: http://localhost:8080/api"
+        echo "✓ Frontend available at: http://localhost:${PORT:-8080}"
+        echo "✓ Backend API at: http://localhost:${PORT:-8080}/api"
         echo "✓ Backend running internally on port ${BACKEND_INTERNAL_PORT:-8081}"
         echo "==================================="
         ;;
 
     FRONTEND)
-        echo "Starting in FRONTEND mode: Frontend only on port 8080"
+        echo "Starting in FRONTEND mode: Frontend only on port ${PORT:-8080}"
 
         # Configure nginx with external backend URL
         BACKEND_URL=${VITE_API_BASE_URL:-http://backend:8080}
         configure_nginx "$BACKEND_URL"
 
-        # Start nginx on port 8080
-        echo "Starting nginx on port 8080..."
+        # Start nginx on port ${PORT:-8080}
+        echo "Starting nginx on port ${PORT:-8080}..."
         run_as_user nginx -g "daemon off;" &
         NGINX_PID=$!
 
         echo "==================================="
-        echo "✓ Frontend available at: http://localhost:8080"
+        echo "✓ Frontend available at: http://localhost:${PORT:-8080}"
         echo "✓ Proxying API calls to: $BACKEND_URL"
         echo "==================================="
         ;;
 
     BACKEND)
-        echo "Starting in BACKEND mode: Backend only on port 8080"
+        echo "Starting in BACKEND mode: Backend only on port ${PORT:-8080}"
 
         # Start backend on port 8080
-        echo "Starting backend on port 8080..."
+        echo "Starting backend on port ${PORT:-8080}..."
         run_as_user sh -c "java -Dfile.encoding=UTF-8 \
             -Djava.io.tmpdir=/tmp/stirling-pdf \
-            -Dserver.port=8080 \
+            -Dserver.port=${PORT:-8080} \
             -jar /app.jar" &
         BACKEND_PID=$!
         start_unoserver_pool
 
         echo "==================================="
-        echo "✓ Backend API available at: http://localhost:8080/api"
-        echo "✓ Swagger UI at: http://localhost:8080/swagger-ui/index.html"
+        echo "✓ Backend API available at: http://localhost:${PORT:-8080}/api"
+        echo "✓ Swagger UI at: http://localhost:${PORT:-8080}/swagger-ui/index.html"
         echo "==================================="
         ;;
 

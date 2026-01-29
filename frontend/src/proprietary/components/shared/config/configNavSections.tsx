@@ -49,8 +49,8 @@ export const useConfigNavSections = (
     }
   }
 
-  // Add Admin sections if user is admin OR if login is disabled (but mark as disabled)
-  if (isAdmin || !loginEnabled) {
+  // Add Admin sections only if user is admin
+  if (isAdmin) {
     const requiresLogin = !loginEnabled;
     const enableLoginTooltip = t('settings.tooltips.enableLoginFirst', 'Enable login mode first');
     const requiresEnterpriseTooltip = t('settings.tooltips.requiresEnterprise', 'Requires Enterprise license');

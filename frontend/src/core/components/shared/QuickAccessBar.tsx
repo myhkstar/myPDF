@@ -180,17 +180,6 @@ const QuickAccessBar = forwardRef<HTMLDivElement>((_, ref) => {
     config?.showSettingsWhenNoLogin === false;
 
   const bottomButtons: ButtonConfig[] = [
-    {
-      id: 'help',
-      name: t("quickAccess.tours", "Tours"),
-      icon: <LocalIcon icon="explore-rounded" width="1.25rem" height="1.25rem" />,
-      isRound: true,
-      size: 'md',
-      type: 'action',
-      onClick: () => {
-        // This will be overridden by the wrapper logic
-      },
-    },
     ...(shouldHideSettingsButton ? [] : [{
       id: 'config',
       name: t("quickAccess.settings", "Settings"),

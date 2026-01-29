@@ -28,6 +28,7 @@ import apiClient from '@app/services/apiClient';
 import '@app/components/onboarding/OnboardingTour.css';
 
 export default function Onboarding() {
+  return null;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();

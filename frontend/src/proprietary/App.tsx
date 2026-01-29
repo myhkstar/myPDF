@@ -54,13 +54,7 @@ export default function App() {
             <AppProviders>
               <AppLayout>
                 <Routes>
-                  {/* Auth routes - no nested providers needed */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/invite/:token" element={<InviteAccept />} />
-
-                  {/* Main app routes - Landing handles auth logic */}
+                  {/* Main app routes - Landing handles auth logic and redirects */}
                   <Route path="/*" element={<Landing />} />
                 </Routes>
                 <Onboarding />
