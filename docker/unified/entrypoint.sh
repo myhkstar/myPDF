@@ -308,7 +308,12 @@ case "$MODE" in
         # Configure nginx to proxy to internal backend
         configure_nginx "http://127.0.0.1:${BACKEND_INTERNAL_PORT:-8081}"
 
-        # Start backend on internal port
+        # Start nginx on port ${PORT:-8080} FIRST to pass Cloud Run health checks
+        echo "Starting nginx on port ${PORT:-8080}..."
+        run_as_user nginx -g "daemon off;" &
+        NGINX_PID=$!
+
+        # Start backend on internal port in background
         echo "Starting backend on port ${BACKEND_INTERNAL_PORT:-8081}..."
         run_as_user sh -c "java -Dfile.encoding=UTF-8 \
             -Djava.io.tmpdir=/tmp/stirling-pdf \
@@ -318,15 +323,6 @@ case "$MODE" in
 
         # Start unoserver pool for document conversion
         start_unoserver_pool
-
-        # Wait for backend to start (Spring Boot can be slow)
-        echo "Waiting for backend to initialize..."
-        sleep 10
-
-        # Start nginx on port ${PORT:-8080}
-        echo "Starting nginx on port ${PORT:-8080}..."
-        run_as_user nginx -g "daemon off;" &
-        NGINX_PID=$!
 
         echo "==================================="
         echo "✓ Frontend available at: http://localhost:${PORT:-8080}"
