@@ -86,8 +86,29 @@ setup_permissions() {
 configure_nginx() {
     local backend_url=$1
     echo "Configuring nginx with backend URL: $backend_url"
+
+    # Perform sed replacements
     sed -i "s|\${BACKEND_URL}|${backend_url}|g" /etc/nginx/nginx.conf
     sed -i "s|\${PORT}|${PORT:-8080}|g" /etc/nginx/nginx.conf
+
+    # Verify sed replacements were successful
+    if grep -q '\${PORT}' /etc/nginx/nginx.conf; then
+        echo "ERROR: Failed to replace \${PORT} in nginx.conf"
+        exit 1
+    fi
+    if grep -q '\${BACKEND_URL}' /etc/nginx/nginx.conf; then
+        echo "ERROR: Failed to replace \${BACKEND_URL} in nginx.conf"
+        exit 1
+    fi
+
+    # Validate nginx configuration
+    echo "Validating nginx configuration..."
+    if ! nginx -t 2>&1; then
+        echo "ERROR: nginx configuration is invalid"
+        cat /etc/nginx/nginx.conf
+        exit 1
+    fi
+    echo "nginx configuration is valid"
 }
 
 # Function to run as user or root depending on permissions
@@ -296,6 +317,36 @@ start_unoserver_pool() {
     start_unoserver_watchdog
 }
 
+# Function to verify nginx started successfully
+verify_nginx_started() {
+    local port=${PORT:-8080}
+    local max_attempts=10
+    local attempt=1
+
+    echo "Verifying nginx started on port $port..."
+    while [ $attempt -le $max_attempts ]; do
+        # Check if nginx process is still running
+        if ! kill -0 $NGINX_PID 2>/dev/null; then
+            echo "ERROR: nginx process exited unexpectedly"
+            wait $NGINX_PID 2>/dev/null
+            exit 1
+        fi
+
+        # Check if port is listening
+        if tcp_port_check "127.0.0.1" "$port" 2; then
+            echo "nginx is listening on port $port"
+            return 0
+        fi
+
+        echo "Waiting for nginx to start (attempt $attempt/$max_attempts)..."
+        sleep 1
+        attempt=$((attempt + 1))
+    done
+
+    echo "ERROR: nginx failed to start listening on port $port"
+    exit 1
+}
+
 # Setup OCR and permissions
 setup_ocr
 setup_permissions
@@ -312,6 +363,9 @@ case "$MODE" in
         echo "Starting nginx on port ${PORT:-8080}..."
         run_as_user nginx -g "daemon off;" &
         NGINX_PID=$!
+
+        # Verify nginx started successfully
+        verify_nginx_started
 
         # Start backend on internal port in background
         echo "Starting backend on port ${BACKEND_INTERNAL_PORT:-8081}..."
@@ -342,6 +396,9 @@ case "$MODE" in
         echo "Starting nginx on port ${PORT:-8080}..."
         run_as_user nginx -g "daemon off;" &
         NGINX_PID=$!
+
+        # Verify nginx started successfully
+        verify_nginx_started
 
         echo "==================================="
         echo "✓ Frontend available at: http://localhost:${PORT:-8080}"
