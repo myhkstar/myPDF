@@ -139,7 +139,8 @@ RUN echo "@main https://dl-cdn.alpinelinux.org/alpine/edge/main" | tee -a /etc/a
     # User permissions
     addgroup -S stirlingpdfgroup && adduser -S stirlingpdfuser -G stirlingpdfgroup && \
     chown -R stirlingpdfuser:stirlingpdfgroup $HOME /scripts /pipeline /usr/share/fonts/opentype/noto /configs /customFiles /pipeline /tmp/stirling-pdf /var/lib/nginx /var/log/nginx /usr/share/nginx && \
-    chown stirlingpdfuser:stirlingpdfgroup /app.jar
+    chown stirlingpdfuser:stirlingpdfgroup /app.jar && \
+    touch /.dockerenv
 
 EXPOSE 8080
 
