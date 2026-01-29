@@ -306,7 +306,7 @@ case "$MODE" in
         echo "Starting in BOTH mode: Frontend + Backend on port ${PORT:-8080}"
 
         # Configure nginx to proxy to internal backend
-        configure_nginx "http://localhost:${BACKEND_INTERNAL_PORT:-8081}"
+        configure_nginx "http://127.0.0.1:${BACKEND_INTERNAL_PORT:-8081}"
 
         # Start backend on internal port
         echo "Starting backend on port ${BACKEND_INTERNAL_PORT:-8081}..."
@@ -319,8 +319,9 @@ case "$MODE" in
         # Start unoserver pool for document conversion
         start_unoserver_pool
 
-        # Wait for backend to start
-        sleep 3
+        # Wait for backend to start (Spring Boot can be slow)
+        echo "Waiting for backend to initialize..."
+        sleep 10
 
         # Start nginx on port ${PORT:-8080}
         echo "Starting nginx on port ${PORT:-8080}..."
