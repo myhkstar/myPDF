@@ -142,5 +142,6 @@
   ],
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
-  }
+  },
+  "claudeCodeChat.permissions.yoloMode": true
 }

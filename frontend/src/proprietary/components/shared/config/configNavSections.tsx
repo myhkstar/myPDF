@@ -16,7 +16,6 @@ import AdminEndpointsSection from '@app/components/shared/config/configSections/
 import AdminAuditSection from '@app/components/shared/config/configSections/AdminAuditSection';
 import AdminUsageSection from '@app/components/shared/config/configSections/AdminUsageSection';
 import ApiKeys from '@app/components/shared/config/configSections/ApiKeys';
-import AccountSection from '@app/components/shared/config/configSections/AccountSection';
 import GeneralSection from '@app/components/shared/config/configSections/GeneralSection';
 
 /**
@@ -38,15 +37,6 @@ export const useConfigNavSections = (
     preferencesSection.items = preferencesSection.items.map((item) =>
       item.key === 'general' ? { ...item, component: <GeneralSection /> } : item
     );
-
-    if (loginEnabled) {
-      preferencesSection.items.push({
-        key: 'account',
-        label: t('account.accountSettings', 'Account'),
-        icon: 'person-rounded',
-        component: <AccountSection />
-      });
-    }
   }
 
   // Add Admin sections only if user is admin
@@ -245,15 +235,6 @@ export const createConfigNavSections = (
     preferencesSection.items = preferencesSection.items.map((item) =>
       item.key === 'general' ? { ...item, component: <GeneralSection /> } : item
     );
-
-    if (loginEnabled) {
-      preferencesSection.items.push({
-        key: 'account',
-        label: 'Account',
-        icon: 'person-rounded',
-        component: <AccountSection />
-      });
-    }
   }
 
   // Add Admin sections if user is admin OR if login is disabled (but mark as disabled)
